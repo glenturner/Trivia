@@ -1,0 +1,13 @@
+body {
+    background-image: url("../images/walking-dead.jpg");
+ 
+
+}
+
+.Container {
+    font-size: 24px;
+}
+
+.gameContainer{
+    margin-top: 15%;
+}
