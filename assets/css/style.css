@@ -4,10 +4,41 @@ body {
 
 }
 
-.Container {
+h1 {
+    text-align: center;
+    color: #ffffff;
+    font-family: 'Coiny', cursive;
+}
+
+h3 {
+    margin-top: -10px;
+}
+
+
+img {
+    width: 98%;
+}
+
+.timeLeft {
+    font-family: 'Coiny', cursive;
+}
+
+.quizContainer {
+    border-radius: 25px;
+    background-color: #ffffff;
+    padding: 5%;
+    margin-top: 25%;
+    height: 500px;
+    width: 500px;
+    font-weight: bold;
     font-size: 24px;
 }
 
-.gameContainer{
-    margin-top: 15%;
+.question {
+    margin-bottom: 15px;
+}
+
+
+.container {
+    margin: 60px;
 }

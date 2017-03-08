@@ -1,256 +1,214 @@
 $(document).ready(function(){ 
 
-var questionsA = [{
+var questions = [{
     
       question: "How does Lori die?",
-      options: ["giving birth", "she was shot",  "walkers ate her", "she drowned"],
-      correctAnswer: "giving birth",
-      image: "assets/images/lori.jpg", 
-    }
-    ];
-
-
-var questionsB = [{ 
+      choices: ["giving birth", "she was shot",  "walkers ate her", "she drowned"],
+      correct: 0,
+      image: "assets/images/lori.jpg",  
+  }, { 
      question: "Who saves Andrea after she is separated from the group?",
-     options: ["Michonne", "Daryl", "The Governor", "Merle"],
-     correctAnswer: "Michonne.",
+     choices: ["Michonne", "Daryl", "The Governor", "Merle"],
+     correct: 0,
      image: "assets/images/andrea.jpg",
-  }
-
-   ];
-
-var questionsC = [{
-   
-      
+  },  {        
       question: "At the end of season 3, after the governor attacked Rick and the group at the prison, it was unclear if Baby Judith survived. Who took her?",
-      options: ["Tyreese", "Carol", "Beth", "Daryl"],
-      correctAnswer: "Tyreese",
+      choices: ["Tyreese", "Carol", "Beth", "Daryl"],
+      correct: 0,
       image: "assets/images/tyreese.jpg",
-
-   },
-   ];
-
-var questionsD = [{
-
-
+   },  {
       question: "What was the name of the father and son that Rick met upon waking up from his coma?",
-      options: ["Michael and Dennis", "Matthew and Derrick", "Mitchell and Doug", "Morgan and Duane"],
-      correctAnswer: "Morgan and Duane",
+      choices: ["Michael and Dennis", "Matthew and Derrick", "Mitchell and Doug", "Morgan and Duane"],
+      correct: 3,
       image: "assets/images/morgan.jpg",
+    },  {
+      question: "What is Daryl's nickname for Baby Judith?",
+      choices: ["Little Ass-Kicker", "Sweet Pea", "Little Lori", "Peanut"],
+      correct: 0,
+      image: "assets/images/ass-kicker.jpg",
 
-   }
- ];
+   }];
 
-var correctAnswers = 0;
-var rightAnswers = 0;
-var wrongAnswers = 0;
-var timeExpired = 0;
-var number = 10;
-var intervalId;
-var gameOver = false;
-var question;
-var questionDiv;
-var optionList;
-var numOptions;
-var time = 0;
-var count;
-var interval;
+    var currentQuestion = 0;
+    var correctAnswers = 0;
+    var incorrectAnswers = 0;
+    var outOfTimeQuestions = 0;
+    var number = 15;
+    var intervalId;
+    var question;
+    var questionClass;
+    var choiceList;
+    var numChoices;
+    var audio = new Audio("assets/audio/walking_dead.mp3");
+    
+  
 
+    
 
+    
+    
+    
+    $(".playAgain").hide();
+
+   
+  $("#start").click(function() {
+    $("#start").hide();
+    $(".question").html("<img src='assets/images/glen.gif'/>");
+    audio.play();
+    setTimeout (function(){
+        reset();
+    }, 9000);
+});
    
   
 
 
 /*Functions
 ==============================================================*/
+  function game() {
+      $(".list-group-item").click(function() {
+                audio.play();
+                var value = $(".list-group-item").index(this);
+                console.log(value);
+                if (value === questions[currentQuestion].correct) {
+                    stop();
+                    console.log("clicked right answer!");
+                    correctAnswers++;
+                    breakTimeCorrect();
+                }
+                else {
+                    stop();
+                    console.log("clicked wrong answer");
+                    incorrectAnswers++;
+                    breakTimeIncorrect();
+                };
 
-  function showQuestion (){
-      
 
-      timer();    
-    for ( var i = 0; i < questionsA.length; i++){
-      $(".question").append("<h2>" + questionsA[i].question + "</h2>");
-      for ( var j = 0; j < questionsA[i].options.length; j++){
-        $(".question").append("<button type='button' class='list-group-item' name='question-" + i + "' value= '" + questionsA[i].options[j] + " '</button>'" + questionsA[i].options[j]);
-       }
+     });
+  }
+
+   function breakTimeCorrect() {
+        
+        $(".timeLeft").html("Correct!");
+        $(".question").html("<img src='" + questions[currentQuestion].image + "'/>");
+        $(".choiceList").hide();
+        setTimeout(function() {
+            $(".timeLeft").empty();
+            $(".result").hide();
+            $(".choiceList").show();
+            nextQuestion();
+        }, 8000);
+
     }
-    
 
-    $('.list-group-item').on('click', '.list-group-item', function(e) {
-      var value = $(this).index('.list-group-item');
-      console.log(value);
+     function breakTimeIncorrect() {
+        
+        var j = questions[currentQuestion].correct;
+        $(".timeLeft").html("Sorry, the correct answer was " + questions[currentQuestion].choices[j]);
+        $(".question").html("<img src='" + questions[currentQuestion].image + "'/>");
+        $(".choiceList").hide();
+        setTimeout(function() {
+            $(".timeLeft").empty();
+            $(".result").hide();
+            $(".choiceList").show();
+            nextQuestion();
+        }, 8000);
+    }
 
-      if (value === 1){
-          console.log("Thats Correct!"); 
-                             
+      //are there any questions left? if yes, display next, if no, display score
+    function nextQuestion() {
+        $(".result").unbind();
+        currentQuestion++;
+        //if no questions left, display score
+        if (currentQuestion < 5) {
+            displayQuestion();
         }
         else {
-            console.log("That is Wrong!");
-           
-        }
-    })
+            displayScore();
+        };
+    };
 
-      $(".question").append("<button id='done'>Done</button>");
-          if ($('#done').on('click',function(){
-            $(".question").remove();
-              nextQuestion();
-          }));
+     function displayScore() {
+        $(".timeLeft").empty();
+        $(".question").html("<img src='assets/images/walking-dead.gif'/>");
+        $(".choiceList").hide();
+        $(".playAgain").show().click(function() {
+            audio.play();
+            reset();
+            });
+        $(".result").html("Correct answers: " + correctAnswers + "<br> Incorrect answers: " + incorrectAnswers + "<br>Unanswered Questions: " + outOfTimeQuestions);
+        $(".result").show();
+    };
 
+     function reset() {
+        //shuffles questions
+        questions.sort(function() { return 0.5 - Math.random() });
+        currentQuestion = 0;
+        correctAnswers = 0;
+        incorrectAnswers = 0;
+        outOfTimeQuestions = 0;
+        number = 15;
+        $(".choiceList").show();
+        $(".timeLeft").show();
+        $(".result").hide();
+        $(".playAgain").hide();
+        displayQuestion();
+    }
+
+
+  function displayQuestion (){
+       $("#start").hide();
+        // starts 30s timer
+        timer();
+        question = questions[currentQuestion].question;
+        console.log("current question: " + question);
+        questionClass = $(".quizContainer").find(".question");
+        choiceList = $(".quizContainer").find(".choiceList");
+        numChoices = questions[currentQuestion].choices.length;
+        console.log("current answer index: " + questions[currentQuestion].correct);
+
+        // Set the questionClass to the current question //
+        $(questionClass).html(question);
+
+        // Remove all current <li> elements (if any)
+        $(choiceList).find(".list-group-item").remove();
+
+        var choice;
+        for (i = 0; i < numChoices; i++) {
+            choice = questions[currentQuestion].choices[i];
+            $("<button type='button' class='list-group-item'>" + choice + "</button>").appendTo(choiceList);
+        };
+        game();
   }
 
-    function nextQuestion (){
-      
+  // sets interval that runs decrement function 1x per second //
+    function timer() {
+        intervalId = setInterval(decrement, 1000);
 
-for ( var i = 0; i < questionsB.length; i++){
-      $(".question2").append("<h2>" + questionsB[i].question + "</h2>");
-      for ( var j = 0; j < questionsB[i].options.length; j++){
-        $(".question2").append("<button type='button' class='list-group-item' name='question-" + i + "' value= '" + questionsB[i].options[j] + " '</button>'" + questionsB[i].options[j]);
-      }
-      
-    }        
-    $(".question2").append("<button id='done'>Done</button>");
-    if ($('#done').on('click',function(){
-      thirdQuestion();
-        $(".question2").remove();
-        
-  }));
-  }
+    };
 
-  function thirdQuestion (){
+    function decrement() {
+        $(".timeLeft").html("<h3>" + number + "</h3>");
+        number--;
+        if (number === 0) {
+            stop();
+            number = 15;
+            outOfTimeQuestions++;
+            console.log("out of time");
+            breakTimeIncorrect();
+        };
+    };
 
-      for ( var i = 0; i < questionsC.length; i++){
-      $(".answer").append("<h2>" + questionsC[i].question + "</h2>");
-      for ( var j = 0; j < questionsC[i].options.length; j++){
-        $(".answer").append("<button type='button' class='list-group-item' name='question-" + i + "' value= '" + questionsC[i].options[j] + " '</button>'" + questionsC[i].options[j]);
-      }
-      
-    }        
-    $(".answer").append("<button id='done'>Done</button>");
-    if ($('#done').on('click',function(){
-
-        $(".answer").remove();
-        
-    }));  
-
-  }
-
-  // function fourthQuestion (){
-  //   for ( var i = 0; i < questionsD.length; i++){
-  //     $(".grade").append("<h2>" + questionsD[i].question + "</h2>");
-  //     for ( var j = 0; j < questionsD[i].options.length; j++){
-  //       $(".grade").append("<button type='button' class='list-group-item' name='question-" + i + "' value= '" + questionsD[i].options[j] + " '</button>'" + questionsD[i].options[j]);
-  //     }
-      
-  //   }        
-  //   $(".grade").append("<button id='done'>Done</button>");
-  //   if ($('#done').on('click',function(){
-  //       $(".grade").remove();
-        
-  // }));
-  // }
-
-/*  //When the player is done answering questions
-function done(){
-    $.each($("button[name='questionA-0']:clicked"), function() {
-          if ($(this).val() === questionsA[0].correctAnswer) {
-          rightAnswers++;
-          }
-          else {
-          wrongAnswers++;
-        }
+    function stop() {
+        clearInterval(intervalId);
+        number = 15;
+    };
 
 
-        $(".grade").append(rightAnswers);
-        $(".grade").append(wrongAnswers);
-        console.log(rightAnswers);
-        console.log(wrongAnswers);
 
-    });
 
-    $.each($("input[name='questionA-1']:checked"), function() {
-        if ($(this).val() === questionsA[1].correctAnswer) {
-        rightAnswers++;
-        }
-        else {
-        wrongAnswers++;
-        }
-    });
 
-  $.each($("input[name='questionA-2']:checked"), function() {
-        if ($(this).val() === questionsA[2].correctAnswer) {
-        rightAnswers++;
-        }
-        else {
-        wrongAnswers++;
-        }
-  });
 
-  $.each($("input[name='questionB-3']:checked"), function() {
-      if ($(this).val() === questionsB[0].correctAnswer) {
-      rightAnswers++;
-      }
-      else {
-      wrongAnswers++;
-      }
-  });
-         
-    $.each($("input[name='questionB-4']:checked"), function() {
-        if ($(this).val() === questionsB[1].correctAnswer) {
-        rightAnswers++;
-        }
-        else {
-        wrongAnswers++;
-        }
-        console.log("Right Answers = ", correctAnswer);
-    });   
   
-  }//end of done function // */
-
-function result (){
-    clearInterval(timer);
-
-    $(".question2").remove();
-
-    question.html("<h2>All Done!</h2>");
-    question.append("<h3>Correct Answers: " + this.correct + "</h3>");
-    question.append("<h3>Incorrect Answers: " + this.incorrect + "</h3>");
-    question.append("<h3>Unanswered: " + (questions.length - (this.incorrect + this.correct)) + "</h3>");
-  
-
-}
-
-  //Sets a timer
-  function timer(){
-      time = 30;
-      interval = setInterval(decrement,3000);
-  }
-  //Actually does the counting
-  function decrement(){
-      time--;
-      /*console.log(time);*/
-      if(time === 0)
-      {
-        // console.log('stops');
-        clearInterval(interval);
-        setTimeout(timer,3000);
-      }
-  }
-
-
-/*Click Functions
-==============================================================*/
-
-$('#start').on('click',function(){
-    $('#start').remove();
-  console.log("startclicked");
-  // timer();
-  showQuestion();
-});
-
-   $('#done').on('click',function(){
-       /* done();*/
-
-      
-   });
 
 });
